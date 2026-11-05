@@ -280,6 +280,8 @@ Las casillas se pueden corregir: toca una casilla llena para vaciarla o arrastra
   - Niveles 1–2: sumas y restas.
   - Nivel 3+: también multiplicaciones y divisiones exactas.
   - Nivel 7+: pueden aparecer expresiones de tres términos con precedencia (por ejemplo `3 + 4 × 5`).
+- **Sin problemas repetidos**: cada casilla del tablero muestra una expresión distinta; tampoco se
+  repiten variantes conmutativas como `4 + 3` y `3 + 4`.
 - **Dificultad**: los operandos crecen con el nivel, las pistas disminuyen y aparecen más distractores.
 - **Opciones**: los valores correctos más distractores cercanos. Las fichas son reutilizables.
 - **Límite técnico**: el generador acepta hasta el nivel 100.000; en la práctica, el juego no tiene final.
@@ -365,8 +367,8 @@ cd backend
 mvn test
 ```
 
-Incluye 7 pruebas unitarias: determinismo del generador, cuadrados latinos, expresiones y precedencia,
-división exacta y presencia de las respuestas correctas entre las opciones.
+Incluye 8 pruebas unitarias: determinismo del generador, cuadrados latinos, expresiones y precedencia,
+división exacta, ausencia de problemas repetidos y presencia de las respuestas correctas entre las opciones.
 
 Flujo probado manualmente/automatizado durante el desarrollo: registro, login, generación de niveles
 3×3 y 4×4, drag & drop, orden ascendente, temporizador, validación de errores, modal de fin de nivel,

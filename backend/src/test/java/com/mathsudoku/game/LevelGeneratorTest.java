@@ -72,6 +72,23 @@ class LevelGeneratorTest {
     }
 
     @Test
+    void noRepiteElMismoProblemaEnElTablero() {
+        for (int level = 1; level <= 40; level++) {
+            for (long seed = 1; seed <= 15; seed++) {
+                GeneratedLevel generated = generator.generate(level, seed);
+
+                Set<String> expressions = new HashSet<>();
+                for (GeneratedCell cell : generated.cells()) {
+                    assertThat(expressions.add(cell.expression()))
+                            .as("expresión repetida %s en nivel %d con semilla %d",
+                                    cell.expression(), level, seed)
+                            .isTrue();
+                }
+            }
+        }
+    }
+
+    @Test
     void losNivelesInicialesSonMasPequenosYConMasPistas() {
         GeneratedLevel easy = generator.generate(1, 42);
         GeneratedLevel advanced = generator.generate(15, 42);
