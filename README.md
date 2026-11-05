@@ -8,6 +8,9 @@ El juego pide **registro/inicio de sesión**, guarda el progreso en **PostgreSQL
 **temporizador por nivel**, **niveles infinitos generados al azar** y un botón para **ordenar las
 opciones de menor a mayor**.
 
+> **Estado: fase de prueba.** El proyecto todavía **no está finalizado**. Esta versión se publica
+> para pruebas y contiene errores ya identificados que se corregirán en próximas iteraciones.
+
 ## Características
 
 - Registro e inicio de sesión con usuario y contraseña (JWT + BCrypt).
