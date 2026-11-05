@@ -1,0 +1,17 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Math Sudoku
+GenericName=Juego de lógica matemática
+Comment=Inicia el juego con Docker Compose y lo abre en el navegador
+Exec=/home/vizente/Documents/code/personal/math-sudoku/scripts/math-sudoku-launch.sh
+Icon=applications-games
+Terminal=false
+Categories=Game;
+Keywords=sudoku;matematicas;juego;docker;
+StartupNotify=true
+Actions=Stop;
+
+[Desktop Action Stop]
+Name=Detener Math Sudoku
+Exec=/home/vizente/Documents/code/personal/math-sudoku/scripts/math-sudoku-stop.sh
