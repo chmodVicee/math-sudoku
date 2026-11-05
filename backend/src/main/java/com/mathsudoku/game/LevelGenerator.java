@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
@@ -33,10 +34,11 @@ public class LevelGenerator {
         Set<Integer> givenPositions = pickGivenPositions(size, givenCount, random);
 
         List<GeneratedCell> cells = new ArrayList<>(size * size);
+        Set<String> usedExpressions = new HashSet<>();
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
                 int value = values[symbolGrid[row][col]];
-                String expression = buildExpression(value, level, random);
+                String expression = buildExpression(value, level, random, usedExpressions);
                 boolean given = givenPositions.contains(row * size + col);
                 cells.add(new GeneratedCell(
                         cellId(row, col),
@@ -125,7 +127,24 @@ public class LevelGenerator {
         return new LinkedHashSet<>(positions.subList(0, Math.min(givenCount, positions.size())));
     }
 
-    private String buildExpression(int value, int level, Random random) {
+    private String buildExpression(int value, int level, Random random, Set<String> usedExpressions) {
+        for (int attempt = 0; attempt < 50; attempt++) {
+            String expression = randomExpression(value, level, random);
+            if (usedExpressions.add(expressionKey(expression))) {
+                return expression;
+            }
+        }
+
+        // Respaldo determinista: restas con operandos distintos para no repetir el problema.
+        for (int offset = 1; ; offset++) {
+            String expression = (value + offset) + " - " + offset;
+            if (usedExpressions.add(expressionKey(expression))) {
+                return expression;
+            }
+        }
+    }
+
+    private String randomExpression(int value, int level, Random random) {
         int maxOperand = Math.min(99, 8 + level * 3);
         List<String> candidates = new ArrayList<>();
 
@@ -157,6 +176,22 @@ public class LevelGenerator {
         String expression = candidates.get(random.nextInt(candidates.size()));
         if (ExpressionEvaluator.evaluate(expression) != value) {
             throw new IllegalStateException("Expresión inconsistente generada: " + expression + " != " + value);
+        }
+        return expression;
+    }
+
+    /**
+     * Clave que trata como iguales las variantes conmutativas de una misma operación,
+     * por ejemplo "4 + 3" y "3 + 4", para no mostrarlas en casillas distintas.
+     */
+    private String expressionKey(String expression) {
+        String[] tokens = expression.split(" ");
+        if (tokens.length == 3) {
+            int left = Integer.parseInt(tokens[0]);
+            int right = Integer.parseInt(tokens[2]);
+            if ("+".equals(tokens[1]) || "×".equals(tokens[1])) {
+                return Math.min(left, right) + " " + tokens[1] + " " + Math.max(left, right);
+            }
         }
         return expression;
     }
