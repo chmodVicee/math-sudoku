@@ -1,0 +1,114 @@
+name: Android APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Install Android SDK packages
+        run: sdkmanager --install "platforms;android-36" "build-tools;36.0.0" "platform-tools"
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Test level generator parity
+        working-directory: frontend
+        run: npm test
+
+      - name: Build web app
+        working-directory: frontend
+        run: npm run build
+
+      - name: Sync Capacitor Android project
+        working-directory: frontend
+        run: npx cap sync android
+
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            echo "name=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=0.0.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          fi
+          echo "code=${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+
+      - name: Build debug APK
+        working-directory: frontend/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon \
+            -PversionName="${{ steps.version.outputs.name }}" \
+            -PversionCode="${{ steps.version.outputs.code }}"
+
+      - name: Prepare APK artifact
+        run: |
+          mkdir -p dist-android
+          cp frontend/android/app/build/outputs/apk/debug/app-debug.apk \
+            "dist-android/math-sudoku-${{ steps.version.outputs.name }}.apk"
+          ls -lh dist-android
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: math-sudoku-apk-${{ steps.version.outputs.name }}
+          path: dist-android/*.apk
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Math Sudoku ${{ steps.version.outputs.name }}
+          tag_name: ${{ github.ref_name }}
+          files: dist-android/*.apk
+          body: |
+            ## Math Sudoku para Android
+
+            APK de prueba generado automáticamente desde la rama `main`.
+
+            ### Instalación
+            1. Descarga `math-sudoku-${{ steps.version.outputs.name }}.apk`.
+            2. En Android, permite la instalación desde esta fuente si el sistema lo solicita.
+            3. Abre la app, crea una cuenta local y juega sin conexión.
+
+            La app guarda usuarios y progreso en SQLite dentro del teléfono. El esquema ya
+            incluye campos de sincronización para conectar el progreso con la versión online
+            (crossplay) en una fase futura.

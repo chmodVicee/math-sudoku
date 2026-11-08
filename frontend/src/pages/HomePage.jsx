@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../api';
+import { data } from '../data';
 import BrandMark from '../components/BrandMark';
 import { ClockIcon, LogoutIcon, PlayIcon, RefreshIcon, TrophyIcon } from '../components/Icons';
 import { useAuth } from '../context/AuthContext';
@@ -30,7 +30,7 @@ export default function HomePage() {
     setLoading(true);
     setError('');
     try {
-      setProgress(await api('/progress'));
+      setProgress(await data.progress.get());
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -47,8 +47,8 @@ export default function HomePage() {
     ? Math.min(...bestTimes.map((result) => result.bestSeconds))
     : null;
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await logout();
     navigate('/login', { replace: true });
   }
 

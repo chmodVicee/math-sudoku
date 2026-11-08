@@ -2064,3 +2064,38 @@ a {
     bottom: 16px;
   }
 }
+
+/* ---------- App Android (Capacitor) ---------- */
+
+.is-native,
+.is-native body {
+  overscroll-behavior: none;
+}
+
+.is-native button,
+.is-native .board-cell,
+.is-native .option-chip {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.is-native .game-header {
+  padding-top: calc(12px + env(safe-area-inset-top));
+}
+
+.is-native .dashboard-header {
+  padding-top: calc(18px + env(safe-area-inset-top));
+}
+
+.is-native .game-main {
+  padding-bottom: calc(40px + env(safe-area-inset-bottom));
+}
+
+.is-native .dashboard-main,
+.is-native .auth-panel {
+  padding-bottom: calc(40px + env(safe-area-inset-bottom));
+}
+
+.is-native .toast {
+  bottom: calc(16px + env(safe-area-inset-bottom));
+}

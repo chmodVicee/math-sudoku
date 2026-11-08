@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { api, clearToken, getToken, setToken } from '../api';
+import { data } from '../data';
 
 const AuthContext = createContext(null);
 
@@ -8,21 +8,16 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-
-    api('/auth/me')
-      .then(setUser)
-      .catch(() => clearToken())
+    data.auth
+      .me()
+      .then((currentUser) => setUser(currentUser ?? null))
+      .catch(() => setUser(null))
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
     const handleExpired = () => {
-      clearToken();
+      data.auth.logout();
       setUser(null);
     };
     window.addEventListener('auth:expired', handleExpired);
@@ -30,29 +25,19 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(async (credentials) => {
-    const response = await api('/auth/login', {
-      method: 'POST',
-      body: credentials,
-      auth: false,
-    });
-    setToken(response.token);
-    setUser(response.user);
-    return response.user;
+    const currentUser = await data.auth.login(credentials);
+    setUser(currentUser);
+    return currentUser;
   }, []);
 
   const register = useCallback(async (credentials) => {
-    const response = await api('/auth/register', {
-      method: 'POST',
-      body: credentials,
-      auth: false,
-    });
-    setToken(response.token);
-    setUser(response.user);
-    return response.user;
+    const currentUser = await data.auth.register(credentials);
+    setUser(currentUser);
+    return currentUser;
   }, []);
 
-  const logout = useCallback(() => {
-    clearToken();
+  const logout = useCallback(async () => {
+    await data.auth.logout();
     setUser(null);
   }, []);
 
