@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { api } from '../api';
+import { data } from '../data';
 import Board from '../components/Board';
 import BrandMark from '../components/BrandMark';
 import { ArrowLeftIcon, ClockIcon, RefreshIcon } from '../components/Icons';
@@ -56,7 +56,7 @@ export default function GamePage() {
     setLoading(true);
     setError('');
     try {
-      const currentProgress = await api('/progress');
+      const currentProgress = await data.progress.get();
       setProgress(currentProgress);
 
       const requested = requestedLevelRef.current;
@@ -65,7 +65,7 @@ export default function GamePage() {
           ? requested
           : currentProgress.currentLevel;
 
-      const levelData = await api(`/game/levels/${level}`);
+      const levelData = await data.game.getLevel(level);
       startLevel(levelData);
     } catch (requestError) {
       setError(requestError.message);
@@ -108,13 +108,10 @@ export default function GamePage() {
     const seconds = Math.max(1, Math.floor((Date.now() - startRef.current) / 1000));
 
     try {
-      const response = await api(`/game/levels/${game.level}/complete`, {
-        method: 'POST',
-        body: {
-          seed: game.seed,
-          elapsedSeconds: seconds,
-          solution: placement,
-        },
+      const response = await data.game.completeLevel(game.level, {
+        seed: game.seed,
+        elapsedSeconds: seconds,
+        solution: placement,
       });
 
       if (response.solved) {
@@ -216,10 +213,10 @@ export default function GamePage() {
     try {
       let current = progress;
       if (!current) {
-        current = await api('/progress');
+        current = await data.progress.get();
         setProgress(current);
       }
-      const nextLevel = await api(`/game/levels/${current.currentLevel}`);
+      const nextLevel = await data.game.getLevel(current.currentLevel);
       startLevel(nextLevel);
     } catch (requestError) {
       setNotice({ type: 'error', text: requestError.message, retryable: true });

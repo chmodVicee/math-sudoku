@@ -1,0 +1,11 @@
+{
+  "appId": "com.mathsudoku.app",
+  "appName": "Math Sudoku",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

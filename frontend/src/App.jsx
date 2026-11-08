@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+import NativeBackButton from './components/NativeBackButton';
 import { useAuth } from './context/AuthContext';
 import GamePage from './pages/GamePage';
 import HomePage from './pages/HomePage';
@@ -30,40 +31,43 @@ function PublicOnly({ children }) {
 
 export default function App() {
   return (
-    <Routes>
-      <Route
-        path="/login"
-        element={
-          <PublicOnly>
-            <LoginPage />
-          </PublicOnly>
-        }
-      />
-      <Route
-        path="/registro"
-        element={
-          <PublicOnly>
-            <RegisterPage />
-          </PublicOnly>
-        }
-      />
-      <Route
-        path="/"
-        element={
-          <RequireAuth>
-            <HomePage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/jugar"
-        element={
-          <RequireAuth>
-            <GamePage />
-          </RequireAuth>
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <NativeBackButton />
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            <PublicOnly>
+              <LoginPage />
+            </PublicOnly>
+          }
+        />
+        <Route
+          path="/registro"
+          element={
+            <PublicOnly>
+              <RegisterPage />
+            </PublicOnly>
+          }
+        />
+        <Route
+          path="/"
+          element={
+            <RequireAuth>
+              <HomePage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/jugar"
+          element={
+            <RequireAuth>
+              <GamePage />
+            </RequireAuth>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
